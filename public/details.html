@@ -6,19 +6,41 @@
   <title>Telco X — Details</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    /* Detail page plan-card grid */
+    .tx-detail-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 640px) {
+      .tx-detail-card-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Provider row redesign */
+    .tx-provider-row {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 16px;
+    }
+    .tx-provider-name { font-weight: var(--font-semibold); font-size: var(--text-body); }
+    .tx-provider-meta { font-size: 13px; color: var(--color-text-muted); margin-top: 2px; }
+
+    /* Subscriber summary strip */
     .tx-strip {
       background: var(--color-navy); color: #fff;
       border-radius: var(--radius-card); padding: var(--space-5);
-      margin-bottom: 16px; display: flex; gap: var(--space-6); flex-wrap: wrap;
+      margin-bottom: 20px; display: flex; gap: var(--space-6); flex-wrap: wrap;
     }
     .tx-strip dt { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; opacity: .6; margin-bottom: 4px; }
     .tx-strip dd { font-weight: var(--font-semibold); margin: 0; }
-    .tx-provider-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--color-border); }
-    .tx-provider-row:last-child { border-bottom: none; }
-    .tx-provider-name { font-weight: var(--font-semibold); }
-    .tx-provider-meta { font-size: 13px; color: var(--color-text-muted); margin-top: 2px; }
-    @media (max-width: 640px) { .detail-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -27,9 +49,13 @@
       <span class="tx-logo__badge" aria-hidden="true">TX</span>
       <span class="tx-logo__name">Telco&nbsp;<span class="tx-logo__x">X</span></span>
     </a>
+    <nav class="tx-nav" aria-label="Main navigation">
+      <a href="/" class="tx-nav__link">Check address</a>
+      <a href="/wifi.html" class="tx-nav__link">Wi-Fi setup</a>
+    </nav>
   </header>
 
-  <main class="tx-container" style="max-width:860px">
+  <main class="tx-container" style="max-width:960px">
 
     <button class="tx-btn--back" id="back-btn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -39,7 +65,11 @@
       Back
     </button>
 
-    <h1 id="page-title" style="font-size:var(--text-page-heading);line-height:var(--lh-page-heading);margin-bottom:var(--space-5)"></h1>
+    <div class="tx-title-row" style="margin-bottom:8px">
+      <h1 id="page-title" style="font-size:var(--text-page-heading);line-height:var(--lh-page-heading);margin:0"></h1>
+      <span id="page-badge" class="tx-status" hidden></span>
+    </div>
+    <p id="page-desc" style="font-size:var(--text-body);color:var(--color-text-muted);margin:0 0 24px" hidden></p>
 
     <div id="page-error" class="tx-card" hidden>
       <p class="tx-error" id="page-error-msg" style="font-size:var(--text-body)"></p>
@@ -60,12 +90,12 @@
         <div class="tx-detail-row"><span class="tx-detail-label">Upgrade eligible</span><span class="tx-detail-value" id="d-upgrade"></span></div>
       </div>
 
-      <div class="detail-grid">
+      <div class="tx-detail-card-grid">
         <div class="tx-card" style="margin:0">
           <p class="tx-section-title">Network health</p>
           <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span id="d-net-rag" class="tx-rag"></span></div>
-          <div class="tx-detail-row"><span class="tx-detail-label">Download</span><span class="tx-detail-value" id="d-net-down"></span></div>
-          <div class="tx-detail-row"><span class="tx-detail-label">Upload</span><span class="tx-detail-value" id="d-net-up"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Download sync</span><span class="tx-detail-value" id="d-net-down"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Upload sync</span><span class="tx-detail-value" id="d-net-up"></span></div>
           <div class="tx-detail-row"><span class="tx-detail-label">Latency</span><span class="tx-detail-value" id="d-net-latency"></span></div>
           <div class="tx-detail-row"><span class="tx-detail-label">Last outage</span><span class="tx-detail-value" id="d-net-outage"></span></div>
         </div>
@@ -80,10 +110,24 @@
 
     <!-- PROVIDERS mode -->
     <div id="providers-section" hidden>
-      <div class="tx-card">
-        <p class="tx-section-title" id="providers-heading"></p>
-        <div id="providers-list"></div>
+      <p id="providers-subhead" style="font-size:var(--text-body);color:var(--color-text-muted);margin:0 0 20px"></p>
+
+      <!-- Selected plan summary card -->
+      <div id="selected-plan" class="tx-card" style="margin-bottom:20px;display:none">
+        <p class="tx-section-title">Selected plan</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <p style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-muted);margin:0 0 4px">Download</p>
+            <p style="font-size:28px;font-weight:700;margin:0;line-height:1" id="plan-down">—<span style="font-size:13px;font-weight:500;margin-left:2px">Mbps</span></p>
+          </div>
+          <div>
+            <p style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-muted);margin:0 0 4px">Upload</p>
+            <p style="font-size:28px;font-weight:700;margin:0;line-height:1" id="plan-up">—<span style="font-size:13px;font-weight:500;margin-left:2px">Mbps</span></p>
+          </div>
+        </div>
       </div>
+
+      <div id="providers-list"></div>
     </div>
 
   </main>

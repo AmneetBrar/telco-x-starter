@@ -6,20 +6,32 @@
   <title>Telco X — Address result</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0 0; }
-    .tx-map { display: flex; align-items: center; gap: 16px; }
-    .tx-map svg { flex-shrink: 0; color: var(--color-alert); }
-    .tx-map__coords { font-size: 13px; color: var(--color-text-muted); margin-top: 2px; }
-    .tx-product-card { background: var(--color-bg-surface); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-4); }
-    .tx-product-card h3 { margin: 0 0 4px; font-size: var(--text-body); font-weight: var(--font-semibold); }
-    .tx-product-card .speeds { font-size: 13px; color: var(--color-text-muted); margin: 0 0 var(--space-3); }
-    .tx-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
-    .tx-upgrade { background: #EBF4FF; border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-5); margin-top: 16px; }
-    .tx-upgrade--off { background: var(--color-bg-surface); opacity: .55; }
-    .tx-upgrade h2 { font-size: var(--text-card-heading); margin: 0 0 6px; }
-    .tx-upgrade p  { font-size: var(--text-label); color: var(--color-text-muted); margin: 0 0 var(--space-4); }
-    .tx-summary { font-size: var(--text-label); color: var(--color-text-muted); margin: 4px 0 0; }
-    @media (max-width: 640px) { .result-grid { grid-template-columns: 1fr; } }
+    /* Result page two-column grid */
+    .result-layout {
+      display: grid;
+      grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 32px;
+    }
+    .result-stats { display: flex; flex-direction: column; gap: 12px; }
+    .result-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Non-active plans grid */
+    .tx-plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 760px) {
+      .result-layout { grid-template-columns: 1fr; }
+      .result-stats-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .result-stats-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -28,9 +40,13 @@
       <span class="tx-logo__badge" aria-hidden="true">TX</span>
       <span class="tx-logo__name">Telco&nbsp;<span class="tx-logo__x">X</span></span>
     </a>
+    <nav class="tx-nav" aria-label="Main navigation">
+      <a href="/" class="tx-nav__link">Check address</a>
+      <a href="/wifi.html" class="tx-nav__link">Wi-Fi setup</a>
+    </nav>
   </header>
 
-  <main class="tx-container" style="max-width:860px">
+  <main class="tx-container" style="max-width:1120px">
 
     <button class="tx-btn--back" id="back-btn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -40,57 +56,75 @@
       Back to search
     </button>
 
+    <!-- Error state -->
     <div id="page-error" class="tx-card" hidden>
       <p class="tx-error" id="page-error-msg" style="font-size:var(--text-body)"></p>
     </div>
 
+    <!-- Page content (populated by JS) -->
     <div id="page-content" hidden>
 
-      <!-- Address heading -->
-      <div style="margin-bottom:8px">
+      <!-- Address heading + inline badge -->
+      <div class="tx-title-row">
+        <h1 id="address" style="font-size:var(--text-section-heading);font-weight:700;line-height:var(--lh-section-heading);margin:0"></h1>
         <span id="connection-badge" class="tx-status"></span>
       </div>
-      <h1 id="address" style="margin:8px 0 2px;font-size:var(--text-page-heading);line-height:var(--lh-page-heading)"></h1>
-      <p id="suburb-line" class="tx-summary"></p>
-
-      <!-- Map pin -->
-      <div class="tx-card tx-map" id="map-panel" role="img" aria-label="">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        <div>
-          <div id="map-address" style="font-weight:var(--font-medium)"></div>
-          <div class="tx-map__coords" id="map-coords"></div>
-        </div>
-      </div>
+      <p id="status-copy" style="font-size:var(--text-body);line-height:var(--lh-body);color:var(--color-text-muted);margin:0 0 24px;max-width:640px"></p>
 
       <!-- ACTIVE branch -->
       <div id="active-section" hidden>
-        <div class="result-grid">
-          <div class="tx-card" style="margin:0">
-            <p class="tx-section-title">Your plan</p>
-            <div class="tx-detail-row"><span class="tx-detail-label">Product</span><span class="tx-detail-value" id="sub-product"></span></div>
-            <div class="tx-detail-row"><span class="tx-detail-label">Connected since</span><span class="tx-detail-value" id="sub-connected"></span></div>
-            <div class="tx-detail-row"><span class="tx-detail-label">Account ref</span><span class="tx-detail-value" id="sub-account"></span></div>
-            <div style="margin-top:16px">
-              <a id="sub-detail-link" href="#" class="tx-btn tx-btn--full">View full details</a>
-            </div>
+        <!-- Two-column: map | stat cards -->
+        <div class="result-layout">
+          <!-- Map overlay -->
+          <div class="tx-map-overlay" id="map-panel" role="img" aria-label="">
+            <div class="tx-map-road-h"></div>
+            <div class="tx-map-road-v"></div>
+            <div class="tx-map-pin-shadow"></div>
+            <div class="tx-map-pin"><div class="tx-map-pin-dot"></div></div>
+            <div class="tx-map-label" id="map-label"></div>
+            <div class="tx-map-coords" id="map-coords"></div>
           </div>
-          <div class="tx-card" style="margin:0">
-            <p class="tx-section-title">Connection type</p>
-            <div class="tx-detail-row"><span class="tx-detail-label">Technology</span><span class="tx-detail-value" id="tech-type"></span></div>
-            <div class="tx-detail-row"><span class="tx-detail-label">Max speed</span><span class="tx-detail-value" id="tech-speed"></span></div>
+
+          <!-- Stat cards column -->
+          <div class="result-stats">
+            <div class="tx-stat-card">
+              <p class="tx-stat-card__label">Connection type</p>
+              <p class="tx-stat-card__value" id="stat-tech"></p>
+            </div>
+            <div class="result-stats-row">
+              <div class="tx-stat-card">
+                <p class="tx-stat-card__label">Download speed</p>
+                <p class="tx-stat-card__value" id="stat-down"></p>
+              </div>
+              <div class="tx-stat-card">
+                <p class="tx-stat-card__label">Upload speed</p>
+                <p class="tx-stat-card__value" id="stat-up"></p>
+              </div>
+            </div>
+            <div class="tx-stat-card">
+              <p class="tx-stat-card__label">Signal quality</p>
+              <span id="stat-signal" class="tx-rag"></span>
+            </div>
+            <div class="tx-stat-card">
+              <p class="tx-stat-card__label">Plan</p>
+              <p class="tx-stat-card__value" id="stat-plan" style="font-size:var(--text-body)"></p>
+            </div>
           </div>
         </div>
 
-        <div class="result-grid" style="margin-top:0">
+        <!-- Action buttons -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px">
+          <a id="view-detail-btn" href="#" class="tx-btn">View subscriber detail</a>
+          <a id="view-plans-btn" href="#" class="tx-btn tx-btn--ghost" style="border-color:var(--color-border)">Check another address</a>
+        </div>
+
+        <!-- Network + Service health -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="health-grid">
           <div class="tx-card" style="margin:0">
             <p class="tx-section-title">Network health</p>
             <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span id="net-rag" class="tx-rag"></span></div>
-            <div class="tx-detail-row"><span class="tx-detail-label">Download</span><span class="tx-detail-value" id="net-down"></span></div>
-            <div class="tx-detail-row"><span class="tx-detail-label">Upload</span><span class="tx-detail-value" id="net-up"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Download sync</span><span class="tx-detail-value" id="net-down"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Upload sync</span><span class="tx-detail-value" id="net-up"></span></div>
             <div class="tx-detail-row"><span class="tx-detail-label">Latency</span><span class="tx-detail-value" id="net-latency"></span></div>
             <div class="tx-detail-row"><span class="tx-detail-label">Last outage</span><span class="tx-detail-value" id="net-outage"></span></div>
           </div>
@@ -103,28 +137,44 @@
         </div>
 
         <!-- Upgrade card (AC-07 / AC-08) -->
-        <div id="upgrade-on" class="tx-upgrade" hidden>
-          <h2>Upgrade available</h2>
-          <p>You may be eligible for a faster speed tier on your current connection.</p>
+        <div id="upgrade-on" style="background:#EBF4FF;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:24px;margin-top:16px" hidden>
+          <h2 style="font-size:var(--text-card-heading);margin:0 0 6px">Upgrade available</h2>
+          <p style="font-size:var(--text-label);color:var(--color-text-muted);margin:0 0 16px">You may be eligible for a faster speed tier on your current connection.</p>
           <a id="upgrade-link" href="#" class="tx-btn" style="display:inline-flex;width:auto">See upgrade options</a>
         </div>
-        <div id="upgrade-off" class="tx-upgrade tx-upgrade--off" hidden aria-disabled="true">
-          <h2>Upgrade options</h2>
-          <p>Your current plan is already at the highest available tier — no upgrade is available.</p>
+        <div id="upgrade-off" style="background:var(--color-bg-surface);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:24px;margin-top:16px;opacity:.55" hidden aria-disabled="true">
+          <h2 style="font-size:var(--text-card-heading);margin:0 0 6px">Upgrade options</h2>
+          <p style="font-size:var(--text-label);color:var(--color-text-muted);margin:0">Your current plan is already at the highest available tier.</p>
         </div>
       </div>
 
       <!-- NON-ACTIVE branch -->
       <div id="nonactive-section" hidden>
-        <div class="tx-card">
-          <p class="tx-section-title">Connection type</p>
-          <div class="tx-detail-row"><span class="tx-detail-label">Technology</span><span class="tx-detail-value" id="na-tech-type"></span></div>
-          <div class="tx-detail-row"><span class="tx-detail-label">Max speed</span><span class="tx-detail-value" id="na-tech-speed"></span></div>
+        <!-- Map + info row -->
+        <div class="result-layout">
+          <div class="tx-map-overlay" id="map-panel-na" role="img" aria-label="">
+            <div class="tx-map-road-h"></div>
+            <div class="tx-map-road-v"></div>
+            <div class="tx-map-pin-shadow"></div>
+            <div class="tx-map-pin"><div class="tx-map-pin-dot"></div></div>
+            <div class="tx-map-label" id="map-label-na"></div>
+            <div class="tx-map-coords" id="map-coords-na"></div>
+          </div>
+          <div class="result-stats">
+            <div class="tx-stat-card">
+              <p class="tx-stat-card__label">Connection type</p>
+              <p class="tx-stat-card__value" id="na-tech"></p>
+            </div>
+            <div class="tx-stat-card">
+              <p class="tx-stat-card__label">Max speed</p>
+              <p class="tx-stat-card__value" id="na-speed"></p>
+            </div>
+          </div>
         </div>
-        <div class="tx-card">
-          <p class="tx-section-title">Available plans</p>
-          <div class="tx-products-grid" id="products-grid"></div>
-        </div>
+
+        <!-- Product cards -->
+        <h2 style="font-size:var(--text-section-heading);font-weight:650;margin:0 0 16px">Available plans</h2>
+        <div class="tx-plans-grid" id="plans-grid"></div>
       </div>
 
     </div><!-- /page-content -->

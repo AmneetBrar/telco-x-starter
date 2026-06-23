@@ -35,23 +35,36 @@
     const loc = await API.getLocation(id);
 
     if (mode === 'details') {
-      document.getElementById('page-title').textContent = 'Full subscriber detail';
+      document.getElementById('page-title').textContent = 'Subscriber detail';
 
       let sub;
       try {
         sub = await API.getSubscriber(id);
       } catch (e) {
         if (e.status === 403 || e.message === 'not_active') {
-          showError('Subscriber detail unavailable for this address.', 'Only active subscribers have a detail record. This address has no current service.');
+          showError('Subscriber detail unavailable for this address.',
+            'Only active subscribers have a detail record. This address has no current service.');
           return;
         }
         throw e;
       }
 
-      const [net, svc, techData] = await Promise.all([API.getNetwork(id), API.getService(id), API.getTechnology(id)]);
+      const [net, svc, techData] = await Promise.all([
+        API.getNetwork(id), API.getService(id), API.getTechnology(id)
+      ]);
 
       loading.hidden = true;
       document.getElementById('details-section').hidden = false;
+
+      // Page header badge
+      const badge = document.getElementById('page-badge');
+      badge.hidden = false;
+      badge.textContent = 'Active';
+      badge.className = 'tx-status tx-status--active';
+
+      const desc = document.getElementById('page-desc');
+      desc.hidden = false;
+      desc.textContent = `${loc.address}, ${loc.suburb} ${loc.state} ${loc.postcode}`;
 
       document.getElementById('summary-strip').innerHTML = `
         <div><dt>Address</dt><dd>${loc.address}, ${loc.suburb}</dd></div>
@@ -65,34 +78,49 @@
 
       setRag(document.getElementById('d-net-rag'), net.network_status);
       document.getElementById('d-net-down').textContent    = `${net.sync_down_mbps} Mbps`;
-      document.getElementById('d-net-up').textContent     = `${net.sync_up_mbps} Mbps`;
+      document.getElementById('d-net-up').textContent      = `${net.sync_up_mbps} Mbps`;
       document.getElementById('d-net-latency').textContent = `${net.latency_ms} ms`;
-      document.getElementById('d-net-outage').textContent = fmtDate(net.last_outage);
+      document.getElementById('d-net-outage').textContent  = fmtDate(net.last_outage);
 
       setRag(document.getElementById('d-svc-rag'), svc.service_health);
       document.getElementById('d-svc-tickets').textContent = svc.open_tickets;
-      document.getElementById('d-svc-appt').textContent   = fmtDate(svc.last_appointment);
+      document.getElementById('d-svc-appt').textContent    = fmtDate(svc.last_appointment);
 
     } else if (mode === 'providers') {
       if (!tech) { location.replace('/'); return; }
 
       document.getElementById('page-title').textContent = 'Choose a provider';
+
       const [providers, products] = await Promise.all([API.getProviders(tech), API.getProducts(tech)]);
       const selectedProduct = products.find(p => p.product_id === product);
 
       loading.hidden = true;
       document.getElementById('providers-section').hidden = false;
-      document.getElementById('providers-heading').textContent =
-        `${providers.length} provider${providers.length !== 1 ? 's' : ''} on ${tech}` +
-        (selectedProduct ? ` — ${selectedProduct.name} (${selectedProduct.down_mbps}↓ / ${selectedProduct.up_mbps}↑ Mbps)` : '');
+
+      document.getElementById('providers-subhead').textContent =
+        `${providers.length} provider${providers.length !== 1 ? 's' : ''} available on ${tech}` +
+        (selectedProduct ? ` for ${selectedProduct.name}` : '');
+
+      // Show selected plan summary card
+      if (selectedProduct) {
+        const planCard = document.getElementById('selected-plan');
+        planCard.style.display = '';
+        document.getElementById('plan-down').innerHTML =
+          `${selectedProduct.down_mbps}<span style="font-size:13px;font-weight:500;margin-left:2px">Mbps</span>`;
+        document.getElementById('plan-up').innerHTML =
+          `${selectedProduct.up_mbps}<span style="font-size:13px;font-weight:500;margin-left:2px">Mbps</span>`;
+      }
 
       document.getElementById('providers-list').innerHTML = providers.map(name => `
         <div class="tx-provider-row">
           <div>
             <div class="tx-provider-name">${name}</div>
-            ${selectedProduct ? `<div class="tx-provider-meta">${selectedProduct.name} · ${selectedProduct.down_mbps}↓ / ${selectedProduct.up_mbps}↑ Mbps</div>` : ''}
+            ${selectedProduct
+              ? `<div class="tx-provider-meta">${selectedProduct.name} · ${selectedProduct.down_mbps}↓ / ${selectedProduct.up_mbps}↑ Mbps · ${tech}</div>`
+              : `<div class="tx-provider-meta">${tech}</div>`}
           </div>
-          <button class="tx-btn" style="width:auto" onclick="alert('Sign-up flow coming soon')">Sign up</button>
+          <button class="tx-btn tx-btn--ghost" style="width:auto;border-color:var(--color-border)"
+            onclick="alert('Sign-up flow coming soon — this is a prototype.')">Sign up</button>
         </div>`).join('');
 
     } else {

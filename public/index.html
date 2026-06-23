@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Telco X — Check your address</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
@@ -13,6 +12,10 @@
       <span class="tx-logo__badge" aria-hidden="true">TX</span>
       <span class="tx-logo__name">Telco&nbsp;<span class="tx-logo__x">X</span></span>
     </a>
+    <nav class="tx-nav" aria-label="Main navigation">
+      <a href="/" class="tx-nav__link tx-nav__link--active">Check address</a>
+      <a href="/wifi.html" class="tx-nav__link">Wi-Fi setup</a>
+    </nav>
   </header>
 
   <div class="tx-page-center">
@@ -20,21 +23,47 @@
       <h1>Find broadband plans for your address</h1>
       <p class="tx-muted">Enter your address to check availability and compare providers.</p>
 
-      <div style="text-align:left;margin-top:24px">
+      <form id="search-form" style="text-align:left;margin-top:24px" onsubmit="return false">
         <label for="search" class="tx-field-label">Your address</label>
         <input id="search" class="tx-field" type="search"
                placeholder="Start typing your street address"
                aria-describedby="search-error" autocomplete="off" />
         <p id="search-error" class="tx-error" role="alert" hidden></p>
-      </div>
+        <button id="check-btn" type="submit" class="tx-btn tx-btn--full" style="margin-top:12px">
+          Check address
+        </button>
+      </form>
 
       <p class="tx-hint">No account required. Results are instant.</p>
-
       <div id="results" aria-live="polite" style="text-align:left"></div>
     </div>
   </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/search.js"></script>
+  <script>
+    // "Check address" button navigates to first matching result
+    document.getElementById('check-btn').addEventListener('click', async () => {
+      const q = document.getElementById('search').value.trim();
+      const errEl = document.getElementById('search-error');
+      if (!q) {
+        errEl.hidden = false;
+        errEl.textContent = 'Enter your address to check availability.';
+        return;
+      }
+      try {
+        const results = await API.searchLocations(q);
+        if (results.length === 1) {
+          location.href = `/result.html?id=${results[0].id}`;
+        } else if (results.length > 1) {
+          // Show list so user can pick
+          errEl.hidden = true;
+        } else {
+          errEl.hidden = false;
+          errEl.textContent = "We can't find that address. Try a suburb, street name or postcode from the list.";
+        }
+      } catch { errEl.hidden = false; errEl.textContent = 'Something went wrong. Please try again.'; }
+    });
+  </script>
 </body>
 </html>

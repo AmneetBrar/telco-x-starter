@@ -6,174 +6,132 @@
   <title>Telco X — Address result</title>
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
-    .tx-map { background: var(--tx-surface); border: 1px solid var(--tx-border); border-radius: var(--tx-radius-card); box-shadow: var(--tx-shadow); padding: 24px; margin: 16px 0; display: flex; align-items: center; gap: 16px; }
-    .tx-map__pin { font-size: 2rem; flex-shrink: 0; }
-    .tx-map__coords { font-size: .8125rem; color: var(--tx-muted); margin-top: 2px; }
-    .tx-badge { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: .8125rem; font-weight: 600; }
-    .tx-badge--active { background: #D4EDDA; color: #155724; }
-    .tx-badge--previous { background: #FFF3CD; color: #856404; }
-    .tx-badge--never { background: #F8D7DA; color: #721C24; }
-    .tx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    .tx-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--tx-border); }
-    .tx-detail-row:last-child { border-bottom: none; }
-    .tx-detail-label { font-size: .875rem; color: var(--tx-muted); }
-    .tx-detail-value { font-weight: 500; }
-    .tx-section-title { font-size: 1rem; font-weight: 650; color: var(--tx-navy); margin: 0 0 12px; }
-    .tx-product-card { background: var(--tx-surface); border: 1px solid var(--tx-border); border-radius: var(--tx-radius-card); box-shadow: var(--tx-shadow); padding: 16px; }
-    .tx-product-card h3 { margin: 0 0 4px; font-size: 1rem; color: var(--tx-ink); }
-    .tx-product-card .speeds { font-size: .875rem; color: var(--tx-muted); margin: 4px 0 12px; }
-    .tx-upgrade-card { background: #EBF4FF; border: 1px solid #B3D4FF; border-radius: var(--tx-radius-card); padding: 20px; margin: 16px 0; }
-    .tx-upgrade-card--disabled { background: #F5F5F5; border-color: var(--tx-border); opacity: .6; }
-    .tx-upgrade-card h2 { margin: 0 0 6px; font-size: 1.1rem; }
-    .tx-upgrade-card p { margin: 0 0 12px; font-size: .875rem; color: var(--tx-muted); }
-    .tx-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 12px; }
-    @media (max-width: 640px) { .tx-grid { grid-template-columns: 1fr; } }
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0 0; }
+    .tx-map { display: flex; align-items: center; gap: 16px; }
+    .tx-map svg { flex-shrink: 0; color: var(--color-alert); }
+    .tx-map__coords { font-size: 13px; color: var(--color-text-muted); margin-top: 2px; }
+    .tx-product-card { background: var(--color-bg-surface); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-4); }
+    .tx-product-card h3 { margin: 0 0 4px; font-size: var(--text-body); font-weight: var(--font-semibold); }
+    .tx-product-card .speeds { font-size: 13px; color: var(--color-text-muted); margin: 0 0 var(--space-3); }
+    .tx-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+    .tx-upgrade { background: #EBF4FF; border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-5); margin-top: 16px; }
+    .tx-upgrade--off { background: var(--color-bg-surface); opacity: .55; }
+    .tx-upgrade h2 { font-size: var(--text-card-heading); margin: 0 0 6px; }
+    .tx-upgrade p  { font-size: var(--text-label); color: var(--color-text-muted); margin: 0 0 var(--space-4); }
+    .tx-summary { font-size: var(--text-label); color: var(--color-text-muted); margin: 4px 0 0; }
+    @media (max-width: 640px) { .result-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <header class="tx-header">
-    <a href="/" class="tx-logo">Telco <span>X</span></a>
+    <a href="/" class="tx-logo" aria-label="Telco X home">
+      <span class="tx-logo__badge" aria-hidden="true">TX</span>
+      <span class="tx-logo__name">Telco&nbsp;<span class="tx-logo__x">X</span></span>
+    </a>
   </header>
+
   <main class="tx-container" style="max-width:860px">
-    <a class="tx-btn tx-btn--ghost" href="/" style="display:inline-block;width:auto;margin-bottom:16px">&larr; Back to search</a>
+
+    <button class="tx-btn--back" id="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+      </svg>
+      Back to search
+    </button>
 
     <div id="page-error" class="tx-card" hidden>
-      <p class="tx-error" id="page-error-msg"></p>
+      <p class="tx-error" id="page-error-msg" style="font-size:var(--text-body)"></p>
     </div>
 
     <div id="page-content" hidden>
-      <!-- Address heading + badge -->
-      <div style="margin-bottom:4px">
-        <span id="connection-badge" class="tx-badge"></span>
+
+      <!-- Address heading -->
+      <div style="margin-bottom:8px">
+        <span id="connection-badge" class="tx-status"></span>
       </div>
-      <h1 id="address" style="margin:8px 0 0"></h1>
-      <p id="suburb-line" class="tx-muted" style="margin:2px 0 0;font-size:.9rem"></p>
+      <h1 id="address" style="margin:8px 0 2px;font-size:var(--text-page-heading);line-height:var(--lh-page-heading)"></h1>
+      <p id="suburb-line" class="tx-summary"></p>
 
       <!-- Map pin -->
-      <div class="tx-map" id="map-panel" role="img" aria-label="">
-        <div class="tx-map__pin">📍</div>
+      <div class="tx-card tx-map" id="map-panel" role="img" aria-label="">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
         <div>
-          <div id="map-address" style="font-weight:600"></div>
+          <div id="map-address" style="font-weight:var(--font-medium)"></div>
           <div class="tx-map__coords" id="map-coords"></div>
         </div>
       </div>
 
       <!-- ACTIVE branch -->
       <div id="active-section" hidden>
-        <div class="tx-grid">
-          <!-- Subscriber card -->
+        <div class="result-grid">
           <div class="tx-card" style="margin:0">
             <p class="tx-section-title">Your plan</p>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Current product</span>
-              <span class="tx-detail-value" id="sub-product"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Connected since</span>
-              <span class="tx-detail-value" id="sub-connected"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Account ref</span>
-              <span class="tx-detail-value" id="sub-account"></span>
-            </div>
-            <div style="margin-top:14px">
-              <a id="sub-detail-link" href="#" class="tx-btn" style="width:100%">View full details</a>
+            <div class="tx-detail-row"><span class="tx-detail-label">Product</span><span class="tx-detail-value" id="sub-product"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Connected since</span><span class="tx-detail-value" id="sub-connected"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Account ref</span><span class="tx-detail-value" id="sub-account"></span></div>
+            <div style="margin-top:16px">
+              <a id="sub-detail-link" href="#" class="tx-btn tx-btn--full">View full details</a>
             </div>
           </div>
-
-          <!-- Technology card -->
           <div class="tx-card" style="margin:0">
             <p class="tx-section-title">Connection type</p>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Technology</span>
-              <span class="tx-detail-value" id="tech-type"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Max speed</span>
-              <span class="tx-detail-value" id="tech-speed"></span>
-            </div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Technology</span><span class="tx-detail-value" id="tech-type"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Max speed</span><span class="tx-detail-value" id="tech-speed"></span></div>
           </div>
         </div>
 
-        <div class="tx-grid" style="margin-top:0">
-          <!-- Network Health -->
+        <div class="result-grid" style="margin-top:0">
           <div class="tx-card" style="margin:0">
             <p class="tx-section-title">Network health</p>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Status</span>
-              <span id="net-rag" class="tx-rag"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Download sync</span>
-              <span class="tx-detail-value" id="net-down"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Upload sync</span>
-              <span class="tx-detail-value" id="net-up"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Latency</span>
-              <span class="tx-detail-value" id="net-latency"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Last outage</span>
-              <span class="tx-detail-value" id="net-outage"></span>
-            </div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span id="net-rag" class="tx-rag"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Download</span><span class="tx-detail-value" id="net-down"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Upload</span><span class="tx-detail-value" id="net-up"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Latency</span><span class="tx-detail-value" id="net-latency"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Last outage</span><span class="tx-detail-value" id="net-outage"></span></div>
           </div>
-
-          <!-- Service Health -->
           <div class="tx-card" style="margin:0">
             <p class="tx-section-title">Service health</p>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Status</span>
-              <span id="svc-rag" class="tx-rag"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Open tickets</span>
-              <span class="tx-detail-value" id="svc-tickets"></span>
-            </div>
-            <div class="tx-detail-row">
-              <span class="tx-detail-label">Last appointment</span>
-              <span class="tx-detail-value" id="svc-appt"></span>
-            </div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span id="svc-rag" class="tx-rag"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Open tickets</span><span class="tx-detail-value" id="svc-tickets"></span></div>
+            <div class="tx-detail-row"><span class="tx-detail-label">Last appointment</span><span class="tx-detail-value" id="svc-appt"></span></div>
           </div>
         </div>
 
-        <!-- Upgrade card -->
-        <div id="upgrade-card" class="tx-upgrade-card" hidden>
+        <!-- Upgrade card (AC-07 / AC-08) -->
+        <div id="upgrade-on" class="tx-upgrade" hidden>
           <h2>Upgrade available</h2>
           <p>You may be eligible for a faster speed tier on your current connection.</p>
-          <a id="upgrade-link" href="#" class="tx-btn" style="width:auto;display:inline-block">See upgrade options</a>
+          <a id="upgrade-link" href="#" class="tx-btn" style="display:inline-flex;width:auto">See upgrade options</a>
         </div>
-        <div id="upgrade-card-disabled" class="tx-upgrade-card tx-upgrade-card--disabled" hidden aria-disabled="true">
+        <div id="upgrade-off" class="tx-upgrade tx-upgrade--off" hidden aria-disabled="true">
           <h2>Upgrade options</h2>
-          <p>Your current plan is already at the highest available tier — no upgrade is available at this time.</p>
+          <p>Your current plan is already at the highest available tier — no upgrade is available.</p>
         </div>
       </div>
 
       <!-- NON-ACTIVE branch -->
       <div id="nonactive-section" hidden>
-        <div class="tx-card" style="margin-bottom:0">
+        <div class="tx-card">
           <p class="tx-section-title">Connection type</p>
-          <div class="tx-detail-row">
-            <span class="tx-detail-label">Technology</span>
-            <span class="tx-detail-value" id="na-tech-type"></span>
-          </div>
-          <div class="tx-detail-row">
-            <span class="tx-detail-label">Max speed</span>
-            <span class="tx-detail-value" id="na-tech-speed"></span>
-          </div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Technology</span><span class="tx-detail-value" id="na-tech-type"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Max speed</span><span class="tx-detail-value" id="na-tech-speed"></span></div>
         </div>
-
         <div class="tx-card">
           <p class="tx-section-title">Available plans</p>
           <div class="tx-products-grid" id="products-grid"></div>
         </div>
       </div>
-    </div>
 
-    <div id="loading" class="tx-card tx-muted">Loading address details…</div>
+    </div><!-- /page-content -->
+
+    <p id="loading" class="tx-muted" style="padding:24px 0">Loading address details…</p>
   </main>
+
   <script src="/js/api.js"></script>
   <script src="/js/result.js"></script>
 </body>

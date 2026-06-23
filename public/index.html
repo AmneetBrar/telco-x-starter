@@ -4,29 +4,35 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Telco X — Check your address</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
   <header class="tx-header">
-    <a href="/" class="tx-logo">Telco <span>X</span></a>
+    <a href="/" class="tx-logo" aria-label="Telco X home">
+      <span class="tx-logo__badge" aria-hidden="true">TX</span>
+      <span class="tx-logo__name">Telco&nbsp;<span class="tx-logo__x">X</span></span>
+    </a>
   </header>
 
-  <main class="tx-container">
-    <div class="tx-center-panel">
+  <div class="tx-page-center">
+    <div class="tx-search-panel">
       <h1>Find broadband plans for your address</h1>
       <p class="tx-muted">Enter your address to check availability and compare providers.</p>
 
-      <label for="search" class="tx-field-label">Your address</label>
-      <input id="search" class="tx-field" type="search"
-             placeholder="Start typing your street address"
-             aria-describedby="search-error" autocomplete="off" />
-      <p id="search-error" class="tx-error" role="alert" hidden></p>
+      <div style="text-align:left;margin-top:24px">
+        <label for="search" class="tx-field-label">Your address</label>
+        <input id="search" class="tx-field" type="search"
+               placeholder="Start typing your street address"
+               aria-describedby="search-error" autocomplete="off" />
+        <p id="search-error" class="tx-error" role="alert" hidden></p>
+      </div>
 
       <p class="tx-hint">No account required. Results are instant.</p>
-    </div>
 
-    <div id="results" aria-live="polite"></div>
-  </main>
+      <div id="results" aria-live="polite" style="text-align:left"></div>
+    </div>
+  </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/search.js"></script>

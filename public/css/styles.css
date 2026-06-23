@@ -1,0 +1,95 @@
+/* Telco X — design tokens + base components */
+:root {
+  --tx-bg: #F5F8FC;
+  --tx-surface: #ffffff;
+  --tx-navy: #102A43;
+  --tx-ink: #172B4D;
+  --tx-muted: #5F6B7A;
+  --tx-border: #D9E2EC;
+  --tx-primary: #146EF5;
+  --tx-primary-ink: #ffffff;
+  --tx-aqua: #007F7D;
+  --tx-radius-card: 12px;
+  --tx-radius-control: 8px;
+  --tx-shadow: 0 1px 3px rgba(16,42,67,.08), 0 4px 16px rgba(16,42,67,.06);
+  /* Operational RAG (status) — distinct in MEANING from the Three-Tier framework */
+  --rag-green: #1B7F55;
+  --rag-amber: #A85D00;
+  --rag-red: #B8322A;
+  --tx-font: Inter, Arial, Helvetica, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--tx-font); color: var(--tx-ink); background: var(--tx-bg); line-height: 1.5; font-size: 16px; }
+
+/* ── Header ── */
+.tx-header {
+  display: flex; align-items: center; padding: 0 24px;
+  height: 56px; background: var(--tx-navy);
+}
+.tx-logo {
+  font-size: 1.05rem; font-weight: 700; letter-spacing: .5px;
+  color: #ffffff; text-decoration: none;
+}
+.tx-logo span { color: var(--tx-aqua); }
+
+/* ── Layout ── */
+.tx-container { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
+.tx-center-panel { max-width: 480px; margin: 80px auto 0; text-align: center; }
+
+/* ── Typography ── */
+h1 { font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin: 0 0 12px; color: var(--tx-ink); }
+h2 { font-size: 1.375rem; font-weight: 650; line-height: 1.36; margin: 1.2em 0 .5em; }
+p { margin: 0 0 16px; }
+
+/* ── Cards ── */
+.tx-card {
+  background: var(--tx-surface); border: 1px solid var(--tx-border);
+  border-radius: var(--tx-radius-card); box-shadow: var(--tx-shadow);
+  padding: 24px; margin: 12px 0;
+}
+.tx-card--link { cursor: pointer; text-align: left; }
+.tx-card--link:hover { border-color: var(--tx-primary); }
+
+/* ── Form controls ── */
+.tx-field-label { display: block; font-size: .875rem; font-weight: 500; color: var(--tx-ink); margin-bottom: 6px; text-align: left; }
+.tx-field {
+  width: 100%; padding: 13px 14px; font-size: 1rem; font-family: var(--tx-font);
+  border: 1px solid var(--tx-border); border-radius: var(--tx-radius-control);
+  background: var(--tx-surface); color: var(--tx-ink);
+}
+.tx-field:focus { outline: 2px solid var(--tx-primary); outline-offset: 1px; border-color: var(--tx-primary); }
+.tx-field::placeholder { color: var(--tx-muted); }
+
+.tx-btn {
+  display: block; width: 100%; padding: 14px 18px; font-size: 1rem; font-weight: 600;
+  font-family: var(--tx-font); cursor: pointer; border: none;
+  border-radius: var(--tx-radius-control); background: var(--tx-primary);
+  color: var(--tx-primary-ink); min-height: 44px; margin-top: 12px;
+}
+.tx-btn:hover { background: #0f5fd4; }
+.tx-btn:focus { outline: 2px solid var(--tx-navy); outline-offset: 2px; }
+.tx-btn--ghost {
+  background: transparent; color: var(--tx-primary);
+  border: 1px solid var(--tx-primary); width: auto;
+}
+
+/* ── Utility ── */
+.tx-muted { color: var(--tx-muted); }
+.tx-error { color: var(--rag-red); font-weight: 600; font-size: .875rem; }
+.tx-hint { font-size: .875rem; color: var(--tx-muted); margin-top: 10px; }
+
+/* ── RAG badges ── */
+.tx-rag { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: .85rem; }
+.tx-rag::before { content: ""; width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.tx-rag--green::before { background: var(--rag-green); }
+.tx-rag--amber::before { background: var(--rag-amber); }
+.tx-rag--red::before   { background: var(--rag-red); }
+
+/* ── Search results list ── */
+#results { margin-top: 24px; text-align: left; }
+
+@media (max-width: 480px) {
+  h1 { font-size: 2rem; }
+  .tx-center-panel { margin-top: 40px; }
+  .tx-card { padding: 16px; }
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Telco X — Details</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .tx-badge { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: .8125rem; font-weight: 600; }
+    .tx-badge--active { background: #D4EDDA; color: #155724; }
+    .tx-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--tx-border); }
+    .tx-detail-row:last-child { border-bottom: none; }
+    .tx-detail-label { font-size: .875rem; color: var(--tx-muted); }
+    .tx-detail-value { font-weight: 500; }
+    .tx-section-title { font-size: 1rem; font-weight: 650; color: var(--tx-navy); margin: 0 0 12px; }
+    .tx-provider-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--tx-border); }
+    .tx-provider-row:last-child { border-bottom: none; }
+    .tx-provider-name { font-weight: 600; }
+    .tx-provider-meta { font-size: .875rem; color: var(--tx-muted); margin-top: 2px; }
+    .tx-summary-strip { background: var(--tx-navy); color: #fff; padding: 16px 24px; border-radius: var(--tx-radius-card); margin-bottom: 16px; display: flex; gap: 32px; flex-wrap: wrap; }
+    .tx-summary-strip dt { font-size: .75rem; opacity: .7; margin-bottom: 2px; }
+    .tx-summary-strip dd { font-weight: 600; margin: 0; }
+  </style>
+</head>
+<body>
+  <header class="tx-header">
+    <a href="/" class="tx-logo">Telco <span>X</span></a>
+  </header>
+  <main class="tx-container" style="max-width:860px">
+    <a id="back" href="#" class="tx-btn tx-btn--ghost" style="display:inline-block;width:auto;margin-bottom:16px">&larr; Back</a>
+    <h1 id="page-title" style="margin-bottom:16px"></h1>
+
+    <div id="page-error" class="tx-card" hidden>
+      <p class="tx-error" id="page-error-msg"></p>
+      <p id="page-error-sub" style="color:var(--tx-muted);font-size:.9rem;margin-top:4px"></p>
+    </div>
+
+    <div id="loading" class="tx-card tx-muted">Loading…</div>
+
+    <!-- DETAILS mode (active subscriber) -->
+    <div id="details-section" hidden>
+      <dl class="tx-summary-strip" id="summary-strip"></dl>
+
+      <div class="tx-card" style="margin-bottom:16px">
+        <p class="tx-section-title">Plan details</p>
+        <div class="tx-detail-row"><span class="tx-detail-label">Product</span><span class="tx-detail-value" id="d-product"></span></div>
+        <div class="tx-detail-row"><span class="tx-detail-label">Account ref</span><span class="tx-detail-value" id="d-account"></span></div>
+        <div class="tx-detail-row"><span class="tx-detail-label">Connected since</span><span class="tx-detail-value" id="d-connected"></span></div>
+        <div class="tx-detail-row"><span class="tx-detail-label">Upgrade eligible</span><span class="tx-detail-value" id="d-upgrade"></span></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="tx-card" style="margin:0">
+          <p class="tx-section-title">Network health</p>
+          <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span id="d-net-rag" class="tx-rag"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Download</span><span class="tx-detail-value" id="d-net-down"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Upload</span><span class="tx-detail-value" id="d-net-up"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Latency</span><span class="tx-detail-value" id="d-net-latency"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Last outage</span><span class="tx-detail-value" id="d-net-outage"></span></div>
+        </div>
+        <div class="tx-card" style="margin:0">
+          <p class="tx-section-title">Service health</p>
+          <div class="tx-detail-row"><span class="tx-detail-label">Status</span><span id="d-svc-rag" class="tx-rag"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Open tickets</span><span class="tx-detail-value" id="d-svc-tickets"></span></div>
+          <div class="tx-detail-row"><span class="tx-detail-label">Last appointment</span><span class="tx-detail-value" id="d-svc-appt"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROVIDERS mode -->
+    <div id="providers-section" hidden>
+      <div class="tx-card">
+        <p class="tx-section-title" id="providers-heading"></p>
+        <div id="providers-list"></div>
+      </div>
+    </div>
+  </main>
+  <script src="/js/api.js"></script>
+  <script src="/js/details.js"></script>
+</body>
+</html>

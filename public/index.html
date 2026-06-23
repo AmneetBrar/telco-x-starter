@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Telco X — Check your address</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="tx-header">
+    <a href="/" class="tx-logo">Telco <span>X</span></a>
+  </header>
+
+  <main class="tx-container">
+    <div class="tx-center-panel">
+      <h1>Find broadband plans for your address</h1>
+      <p class="tx-muted">Enter your address to check availability and compare providers.</p>
+
+      <label for="search" class="tx-field-label">Your address</label>
+      <input id="search" class="tx-field" type="search"
+             placeholder="Start typing your street address"
+             aria-describedby="search-error" autocomplete="off" />
+      <p id="search-error" class="tx-error" role="alert" hidden></p>
+
+      <p class="tx-hint">No account required. Results are instant.</p>
+    </div>
+
+    <div id="results" aria-live="polite"></div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/search.js"></script>
+</body>
+</html>

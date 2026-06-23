@@ -120,6 +120,100 @@ Given the app is viewed on a mobile viewport, When any of the three pages loads,
 AC-18 · Accessibility labels
 Given any page is rendered, When inspected for accessibility, Then every interactive element has a clear visible label and the RAG status indicators include a text label (not colour alone).
 
+Page 4 — Modem Placement Assistant
+
+
+Added via Change Request · 2026-06-23 · AI output is mock/rule-based for this challenge.
+
+
+
+AC-19 · Entry point accessible from nav
+
+Given the user is on any page of the app,
+When they click Improve your Wi-Fi setup in the nav,
+Then the app navigates to the Modem Placement Assistant page without disrupting the existing 3-page address flow.
+
+AC-20 · Check modem placement button visible
+
+Given the user is on the Modem Placement Assistant page,
+When the page loads,
+Then a Check modem placement button is visible and clickable.
+
+AC-21 · Two image upload controls present
+
+Given the user clicks Check modem placement,
+When the upload section is displayed,
+Then two separate upload controls are shown — one labelled for a modem photo and one labelled for a floorplan image.
+
+AC-22 · Image preview displayed after upload
+
+Given the user selects an image in either upload control,
+When the file is selected,
+Then a thumbnail preview or the file name is displayed beneath the corresponding upload control.
+
+AC-23 · Privacy notice displayed
+
+Given the user is on the upload section,
+When the upload controls are visible,
+Then the following privacy message is displayed: "Images are used only to generate placement tips in this demo. Do not upload sensitive personal information."
+
+AC-24 · Get placement tips button requires both uploads
+
+Given the user has not yet uploaded both images,
+When they attempt to click Get placement tips,
+Then the button is disabled or an inline validation message prompts them to upload both images before proceeding.
+
+
+🔴 Human Decision recorded: Button is disabled until both files are selected. No validation error state required. Update CLAUDE.md and the GitHub Issue before build.
+
+
+
+AC-25 · Loading state shown while processing
+
+Given the user has uploaded both images and clicks Get placement tips,
+When the app is generating tips,
+Then a loading state is displayed with the message Analysing your home setup (or equivalent), and the button is non-interactive during this state.
+
+AC-26 · Results show 3–5 placement tips
+
+Given the loading state completes,
+When the results section is displayed,
+Then between 3 and 5 placement tips are shown, drawn from the modem photo condition and floorplan condition rules defined in the change request.
+
+AC-27 · Tips are contextually varied by input type
+
+Given the results are displayed,
+When the tips are rendered,
+Then at least one tip is derived from the modem photo condition rules and at least one from the floorplan condition rules, so results do not appear identical regardless of input.
+
+
+🔴 Human Decision recorded: Mock logic uses fixed rotation — tips cycle through the modem photo and floorplan condition lists in a predetermined order, independent of actual image content. Document the rotation sequence in CLAUDE.md so the engineer and tester are aligned.
+
+
+
+AC-28 · Confidence label displayed
+
+Given the results section is displayed,
+When tips are shown,
+Then a Confidence label (e.g. Low / Medium / High) is displayed alongside the tips.
+
+AC-29 · Disclaimer displayed with results
+
+Given the results section is displayed,
+When tips are shown,
+Then the following disclaimer is visible: "These tips are indicative only. Actual Wi-Fi performance may depend on walls, building materials, device type, and network conditions."
+
+AC-30 · Feature does not break existing 3-page flow
+
+Given the user has used the Modem Placement Assistant,
+When they navigate back to the main app,
+Then the address search, result, and detail pages all function correctly with no state corruption.
+
+AC-31 · Team can explain mock vs real AI approach
+
+Given the team is demoing the feature,
+When asked about the AI output,
+Then the team can clearly describe whether the output is real, mocked, or rule-based, and explain how a real vision model (e.g. Claude's vision API) could replace the mock logic in production.
+
 Notes
-RAG labels on AC-05, AC-06, and AC-18 refer to operational status (network/service health 🔴🟡🟢). Keep these clearly distinct from the Three-Tier framework labels — same colours, different meaning.
-Both [UNDEFINED RULE] decisions are now resolved and recorded above (AC-08, AC-13). Ensure CLAUDE.md is updated before handing Issues to the engineer.
+Two new [UNDEFINED RULE] items from the Modem Placement Assistant section are now resolved (AC-24, AC-27). Update CLAUDE.md before handing Issues to the engineer.
